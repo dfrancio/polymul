@@ -1,14 +1,19 @@
-Fast multivariate polynomial multiplication in C++, by Ulf Ekstrom 
-<uekstrom@gmail.com> 2009. See  polymul.h for license, and 
-polymul.googlecode.com for documentation and the latest version of this
-library.
+Fast multivariate polynomial multiplication in C++
+
+Created by Ulf Ekstrom <uekstrom@gmail.com> 2009
+
+Adapted and extended by Diego Sogari <diego.sogari@gmail.com> 2016.
+
+See LICENSE for license
+
+Documentation:  https://code.google.com/archive/p/polymul/
+Latest version: https://github.com/dsogari/polymul
 
 Included files:
-
-polymul.h          The library header and implementation (self contained)
-polymul_test.cpp   A set of tests for polymul.h
-benchmark.cpp      A simple benchmark program
-polymul_tab.h      Explicit multiplication tables, sometimes much faster
-                   than the recursive templates used by default. Included
-		   into polymul.h by compiling with -DPOLYMUL_TAB
-gentab.py          Generates polymul_tab.h
+include/polymul.h       The library header and implementation (self contained)
+include/polymul_tab.h   Explicit multiplication tables, sometimes much faster
+                        than the recursive templates used by default. Included
+                        into polymul.h by compiling with -DPOLYMUL_USE_TABLES
+tests/polymul_test.cpp  A set of tests for polymul.h
+tests/benchmark.cpp     A simple benchmark program
+gentab.py               Python script to generate polymul_tab.h
