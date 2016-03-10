@@ -26,3 +26,8 @@ polymul_with_tab_test_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
 
 benchmark_with_tab_SOURCES = tests/benchmark.cpp
 benchmark_with_tab_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
+
+noinst_PROGRAMS = example
+
+example_SOURCES = examples/example.cpp
+example_CPPFLAGS = -I$(top_srcdir)/include

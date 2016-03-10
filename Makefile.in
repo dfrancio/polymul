@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -89,6 +90,7 @@ POST_UNINSTALL = :
 TESTS = polymul_test$(EXEEXT) benchmark$(EXEEXT) \
 	polymul_with_tab_test$(EXEEXT) benchmark_with_tab$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1)
+noinst_PROGRAMS = example$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -104,6 +106,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = polymul_test$(EXEEXT) benchmark$(EXEEXT) \
 	polymul_with_tab_test$(EXEEXT) benchmark_with_tab$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_benchmark_OBJECTS = tests/benchmark-benchmark.$(OBJEXT)
 benchmark_OBJECTS = $(am_benchmark_OBJECTS)
@@ -112,6 +115,9 @@ am_benchmark_with_tab_OBJECTS =  \
 	tests/benchmark_with_tab-benchmark.$(OBJEXT)
 benchmark_with_tab_OBJECTS = $(am_benchmark_with_tab_OBJECTS)
 benchmark_with_tab_LDADD = $(LDADD)
+am_example_OBJECTS = examples/example-example.$(OBJEXT)
+example_OBJECTS = $(am_example_OBJECTS)
+example_LDADD = $(LDADD)
 am_polymul_test_OBJECTS = tests/polymul_test-polymul_test.$(OBJEXT)
 polymul_test_OBJECTS = $(am_polymul_test_OBJECTS)
 polymul_test_LDADD = $(LDADD)
@@ -153,9 +159,11 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(benchmark_SOURCES) $(benchmark_with_tab_SOURCES) \
-	$(polymul_test_SOURCES) $(polymul_with_tab_test_SOURCES)
+	$(example_SOURCES) $(polymul_test_SOURCES) \
+	$(polymul_with_tab_test_SOURCES)
 DIST_SOURCES = $(benchmark_SOURCES) $(benchmark_with_tab_SOURCES) \
-	$(polymul_test_SOURCES) $(polymul_with_tab_test_SOURCES)
+	$(example_SOURCES) $(polymul_test_SOURCES) \
+	$(polymul_with_tab_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -511,6 +519,8 @@ polymul_with_tab_test_SOURCES = tests/polymul_test.cpp
 polymul_with_tab_test_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
 benchmark_with_tab_SOURCES = tests/benchmark.cpp
 benchmark_with_tab_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
+example_SOURCES = examples/example.cpp
+example_CPPFLAGS = -I$(top_srcdir)/include
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -567,6 +577,9 @@ distclean-hdr:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 tests/$(am__dirstamp):
 	@$(MKDIR_P) tests
 	@: > tests/$(am__dirstamp)
@@ -585,6 +598,18 @@ tests/benchmark_with_tab-benchmark.$(OBJEXT): tests/$(am__dirstamp) \
 benchmark_with_tab$(EXEEXT): $(benchmark_with_tab_OBJECTS) $(benchmark_with_tab_DEPENDENCIES) $(EXTRA_benchmark_with_tab_DEPENDENCIES) 
 	@rm -f benchmark_with_tab$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(benchmark_with_tab_OBJECTS) $(benchmark_with_tab_LDADD) $(LIBS)
+examples/$(am__dirstamp):
+	@$(MKDIR_P) examples
+	@: > examples/$(am__dirstamp)
+examples/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) examples/$(DEPDIR)
+	@: > examples/$(DEPDIR)/$(am__dirstamp)
+examples/example-example.$(OBJEXT): examples/$(am__dirstamp) \
+	examples/$(DEPDIR)/$(am__dirstamp)
+
+example$(EXEEXT): $(example_OBJECTS) $(example_DEPENDENCIES) $(EXTRA_example_DEPENDENCIES) 
+	@rm -f example$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(example_OBJECTS) $(example_LDADD) $(LIBS)
 tests/polymul_test-polymul_test.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
@@ -600,11 +625,13 @@ polymul_with_tab_test$(EXEEXT): $(polymul_with_tab_test_OBJECTS) $(polymul_with_
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f examples/*.$(OBJEXT)
 	-rm -f tests/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@examples/$(DEPDIR)/example-example.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/benchmark-benchmark.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/benchmark_with_tab-benchmark.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/polymul_test-polymul_test.Po@am__quote@
@@ -653,6 +680,20 @@ tests/benchmark_with_tab-benchmark.obj: tests/benchmark.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/benchmark.cpp' object='tests/benchmark_with_tab-benchmark.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_with_tab_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/benchmark_with_tab-benchmark.obj `if test -f 'tests/benchmark.cpp'; then $(CYGPATH_W) 'tests/benchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/benchmark.cpp'; fi`
+
+examples/example-example.o: examples/example.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(example_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT examples/example-example.o -MD -MP -MF examples/$(DEPDIR)/example-example.Tpo -c -o examples/example-example.o `test -f 'examples/example.cpp' || echo '$(srcdir)/'`examples/example.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/example-example.Tpo examples/$(DEPDIR)/example-example.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='examples/example.cpp' object='examples/example-example.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(example_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o examples/example-example.o `test -f 'examples/example.cpp' || echo '$(srcdir)/'`examples/example.cpp
+
+examples/example-example.obj: examples/example.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(example_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT examples/example-example.obj -MD -MP -MF examples/$(DEPDIR)/example-example.Tpo -c -o examples/example-example.obj `if test -f 'examples/example.cpp'; then $(CYGPATH_W) 'examples/example.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/example.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) examples/$(DEPDIR)/example-example.Tpo examples/$(DEPDIR)/example-example.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='examples/example.cpp' object='examples/example-example.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(example_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o examples/example-example.obj `if test -f 'examples/example.cpp'; then $(CYGPATH_W) 'examples/example.cpp'; else $(CYGPATH_W) '$(srcdir)/examples/example.cpp'; fi`
 
 tests/polymul_test-polymul_test.o: tests/polymul_test.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/polymul_test-polymul_test.o -MD -MP -MF tests/$(DEPDIR)/polymul_test-polymul_test.Tpo -c -o tests/polymul_test-polymul_test.o `test -f 'tests/polymul_test.cpp' || echo '$(srcdir)/'`tests/polymul_test.cpp
@@ -1113,7 +1154,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(HEADERS) config.h
+all-am: Makefile $(PROGRAMS) $(HEADERS) config.h
 installdirs:
 	for dir in "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1147,6 +1188,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f examples/$(DEPDIR)/$(am__dirstamp)
+	-rm -f examples/$(am__dirstamp)
 	-rm -f tests/$(DEPDIR)/$(am__dirstamp)
 	-rm -f tests/$(am__dirstamp)
 
@@ -1155,11 +1198,12 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf tests/$(DEPDIR)
+	-rm -rf examples/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -1207,7 +1251,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf tests/$(DEPDIR)
+	-rm -rf examples/$(DEPDIR) tests/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1229,17 +1273,17 @@ uninstall-am: uninstall-includeHEADERS
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-TESTS \
 	check-am clean clean-checkPROGRAMS clean-cscope clean-generic \
-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	distcheck distclean distclean-compile distclean-generic \
-	distclean-hdr distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-includeHEADERS install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-noinstPROGRAMS cscope cscopelist-am ctags ctags-am dist \
+	dist-all dist-bzip2 dist-gzip dist-lzip dist-shar dist-tarZ \
+	dist-xz dist-zip distcheck distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am info \
+	info-am install install-am install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-includeHEADERS \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
 	uninstall uninstall-am uninstall-includeHEADERS

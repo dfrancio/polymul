@@ -28,9 +28,10 @@
   function with lower nvar value.
 */
 
-// Some compilers implement the C99 restrict also in C++.
-// Need to find a way to differentiate between newer g++ and
-// other compilers that define __GNUC__ (like Intel icc).
+/*
+ * Some compilers implement the C99 restrict also in C++. Need to find a way to differentiate
+ * between newer g++ and other compilers that define __GNUC__ (like Intel icc).
+ */
 #ifdef __GNUC_AND_NOT_ICC__
 #define POLYMUL_RESTRICT __restrict__
 #else
@@ -1408,11 +1409,10 @@ inline int runtime_polylen(int nvar, int ndeg)
 } // End of namespace detail
 
 /*!
- * \brief Polynomial with Nvar variables and degree Ndeg. numtype is the type of the coefficients.
- * This version wraps a reference to a coefficient array.
+ * \brief The basic_var_polynomial class
  */
 template <class numtype, int Nvar, int Ndeg>
-class basic_polynomial
+class basic_var_polynomial
 {
 public:
     /*!
@@ -1424,9 +1424,49 @@ public:
     };
 
     /*!
+     * \brief Coefficient array type
+     */
+    typedef numtype coeff_array[size];
+
+    /*!
+     * \brief operator []
+     * \param i
+     * \return
+     */
+    virtual numtype &operator[](int i) = 0;
+
+    /*!
+     * \brief get_coeffs
+     * \return
+     */
+    virtual coeff_array &get_coeffs() = 0;
+};
+
+/*!
+ * \brief Polynomial with Nvar variables and degree Ndeg. numtype is the type of the coefficients.
+ * This version wraps a reference to a const coefficient array.
+ */
+template <class numtype, int Nvar, int Ndeg>
+class const_polynomial
+{
+public:
+    /*!
+     * \brief Number of coefficients.
+     */
+    enum
+    {
+        size = detail::polylen<Nvar, Ndeg>::len
+    };
+
+    /*!
+     * \brief Coefficient array type
+     */
+    typedef numtype coeff_array[size];
+
+    /*!
      * \brief Construct a polynomial with coefficient array reference
      */
-    basic_polynomial(numtype (&coeffs)[size]) : c(coeffs)
+    const_polynomial(const coeff_array &coeffs) : c(coeffs)
     {
     }
 
@@ -1443,29 +1483,12 @@ public:
     }
 
     /*!
-     * \brief Return coefficient i, in graded lexicographical order, for example 1 x y x^2 xy y^2 ..
-     * \param i
+     * \brief get_coeffs
      * \return
      */
-    numtype &operator[](int i)
+    const coeff_array &get_coeffs() const
     {
-        assert(i >= 0);
-        assert(i < this->size);
-        return c[i];
-    }
-
-    /*!
-     * \brief Assign the constant term the value c0 and zero the other terms.
-     * \param c0
-     * \return
-     */
-    template <class T>
-    basic_polynomial &operator=(const T &c0)
-    {
-        c[0] = numtype(c0);
-        for (int i = 1; i < size; i++)
-            c[i] = numtype(0);
-        return *this;
+        return c;
     }
 
     /*!
@@ -1475,19 +1498,19 @@ public:
      * \todo Allow also change of Nvar
      */
     template <class T, int Ndeg2>
-    void convert_to(basic_polynomial<T, Nvar, Ndeg2> &result) const
+    void convert_to(basic_var_polynomial<T, Nvar, Ndeg2> &result) const
     {
         if (size < int(result.size))
         {
             for (int i = 0; i < size; i++)
-                result.c[i] = c[i];
+                result[i] = c[i];
             for (int i = size; i < result.size; i++)
-                result.c[i] = T();
+                result[i] = T();
         }
         else
         {
             for (int i = 0; i < result.size; i++)
-                result.c[i] = c[i];
+                result[i] = c[i];
         }
     }
 
@@ -1510,7 +1533,7 @@ public:
         for (int i = 0; i < Nvar; i++)
             exponents[i] = 0;
         for (int i = 0; i < term; i++)
-            basic_polynomial<numtype, Nvar, Ndeg>::next_exponents(Nvar, exponents);
+            const_polynomial<numtype, Nvar, Ndeg>::next_exponents(Nvar, exponents);
     }
 
     /*!
@@ -1550,15 +1573,10 @@ public:
      * \param derivative
      */
     template <int var>
-    void diff(basic_polynomial<numtype, Nvar, Ndeg - 1> &derivative) const
+    void diff(basic_var_polynomial<numtype, Nvar, Ndeg - 1> &derivative) const
     {
-        detail::differentiator<numtype, Nvar, Ndeg, var>::diff(derivative.c, c);
+        detail::differentiator<numtype, Nvar, Ndeg, var>::diff(derivative.get_coeffs(), c);
     }
-
-    /*!
-     * \brief Coefficients
-     */
-    numtype (&c)[size];
 
 protected:
     /*!
@@ -1596,29 +1614,59 @@ protected:
             m[nvar - 1] = 0;
         }
     }
+
+private:
+    /*!
+     * \brief Coefficients
+     */
+    const coeff_array &c;
 };
 
 /*!
  * \brief Polynomial with Nvar variables and degree Ndeg. numtype is the type of the coefficients.
+ * This version wraps a reference to a non-const coefficient array.
  */
 template <class numtype, int Nvar, int Ndeg>
-class polynomial : public basic_polynomial<numtype, Nvar, Ndeg>
+class var_polynomial : public basic_var_polynomial<numtype, Nvar, Ndeg>,
+                       public const_polynomial<numtype, Nvar, Ndeg>
 {
 public:
     /*!
      * \brief Number of coefficients
      */
-    using basic_polynomial<numtype, Nvar, Ndeg>::size;
+    using const_polynomial<numtype, Nvar, Ndeg>::size;
 
     /*!
-     * \brief Construct a polynomial with constant coefficient c0 and other terms zero.
-     * \param c0
+     * \brief Coefficient array type
      */
-    polynomial(const numtype &c0 = numtype()) : basic_polynomial<numtype, Nvar, Ndeg>(coeffs)
+    using typename const_polynomial<numtype, Nvar, Ndeg>::coeff_array;
+
+    /*!
+     * \brief Construct a polynomial with coefficient array reference
+     */
+    var_polynomial(coeff_array &coeffs) : const_polynomial<numtype, Nvar, Ndeg>(coeffs), c(coeffs)
     {
-        coeffs[0] = c0;
-        for (int i = 1; i < size; i++)
-            coeffs[i] = numtype();
+    }
+
+    /*!
+     * \brief Return coefficient i, in graded lexicographical order, for example 1 x y x^2 xy y^2 ..
+     * \param i
+     * \return
+     */
+    virtual numtype &operator[](int i)
+    {
+        assert(i >= 0);
+        assert(i < this->size);
+        return c[i];
+    }
+
+    /*!
+     * \brief get_coeffs
+     * \return
+     */
+    virtual coeff_array &get_coeffs()
+    {
+        return c;
     }
 
     /*!
@@ -1626,10 +1674,36 @@ public:
      * \param other
      * \return
      */
-    polynomial &operator=(const polynomial &other)
+    var_polynomial &operator=(const var_polynomial &other)
     {
         for (int i = 0; i < size; i++)
-            coeffs[i] = other.c[i];
+            c[i] = other.c[i];
+        return *this;
+    }
+
+    /*!
+     * \brief Assign the coefficients
+     * \param coeffs
+     * \return
+     */
+    var_polynomial &operator=(const coeff_array &coeffs)
+    {
+        for (int i = 0; i < size; i++)
+            c[i] = coeffs[i];
+        return *this;
+    }
+
+    /*!
+     * \brief Assign the constant term the value c0 and zero the other terms
+     * \param c0
+     * \return
+     */
+    template <class T>
+    var_polynomial &operator=(const T &c0)
+    {
+        c[0] = numtype(c0);
+        for (int i = 1; i < size; i++)
+            c[i] = numtype(0);
         return *this;
     }
 
@@ -1637,119 +1711,232 @@ private:
     /*!
      * \brief Coefficients
      */
-    numtype coeffs[size];
+    coeff_array &c;
 };
 
 /*!
- * \brief mul
- */
-template <class numtype, int Nvar, int Ndeg1, int Ndeg2>
-inline void mul(
-    basic_polynomial<numtype, Nvar, Ndeg1 + Ndeg2> &POLYMUL_RESTRICT dst,
-    const basic_polynomial<numtype, Nvar, Ndeg1> &p1,
-    const basic_polynomial<numtype, Nvar, Ndeg2> &p2)
-{
-    detail::polynomial_multiplier<numtype, Nvar, Ndeg1, Ndeg2>::mul_set(dst.c, p1.c, p2.c);
-}
-
-/*!
- * \brief taylormul
+ * \brief Polynomial with Nvar variables and degree Ndeg. numtype is the type of the coefficients.
  */
 template <class numtype, int Nvar, int Ndeg>
-inline void taylormul(
-    basic_polynomial<numtype, Nvar, Ndeg> &POLYMUL_RESTRICT dst,
-    const basic_polynomial<numtype, Nvar, Ndeg> &p1,
-    const basic_polynomial<numtype, Nvar, Ndeg> &p2)
+class polynomial : public var_polynomial<numtype, Nvar, Ndeg>
 {
-    detail::taylor_multiplier<numtype, Nvar, Ndeg, Ndeg>::mul_set(dst.c, p1.c, p2.c);
+public:
+    /*!
+     * \brief Number of coefficients
+     */
+    using var_polynomial<numtype, Nvar, Ndeg>::size;
+
+    /*!
+     * \brief Coefficient array type
+     */
+    using typename var_polynomial<numtype, Nvar, Ndeg>::coeff_array;
+
+    /*!
+     * \brief Construct a polynomial with constant coefficient c0 and other terms zero.
+     * \param c0
+     */
+    explicit polynomial(const numtype &c0 = numtype()) : var_polynomial<numtype, Nvar, Ndeg>(c)
+    {
+        c[0] = c0;
+        for (int i = 1; i < size; i++)
+            c[i] = numtype();
+    }
+
+    /*!
+     * \brief Using assigment operator from base class
+     */
+    using var_polynomial<numtype, Nvar, Ndeg>::operator=;
+
+private:
+    /*!
+     * \brief Coefficients
+     */
+    coeff_array c;
+};
+
+/*!
+ * \brief Multiplication
+ * \param dst
+ * \param p1
+ * \param p2
+ */
+template <class numtype, int Nvar, int Ndeg1, int Ndeg2>
+void mul(
+    var_polynomial<numtype, Nvar, Ndeg1 + Ndeg2> &POLYMUL_RESTRICT dst,
+    const const_polynomial<numtype, Nvar, Ndeg1> &p1,
+    const const_polynomial<numtype, Nvar, Ndeg2> &p2)
+{
+    detail::polynomial_multiplier<numtype, Nvar, Ndeg1, Ndeg2>::mul_set(
+        dst.get_coeffs(), p1.get_coeffs(), p2.get_coeffs());
 }
 
 /*!
- * \brief taylormul
+ * \brief Taylor multiplication
+ * \param dst
+ * \param p1
+ * \param p2
+ */
+template <class numtype, int Nvar, int Ndeg>
+void taylormul(
+    var_polynomial<numtype, Nvar, Ndeg> &POLYMUL_RESTRICT dst,
+    const const_polynomial<numtype, Nvar, Ndeg> &p1,
+    const const_polynomial<numtype, Nvar, Ndeg> &p2)
+{
+    detail::taylor_multiplier<numtype, Nvar, Ndeg, Ndeg>::mul_set(
+        dst.get_coeffs(), p1.get_coeffs(), p2.get_coeffs());
+}
+
+/*!
+ * \brief Taylor in-place multiplication
+ * \param dst
+ * \param p
  */
 template <class numtype, int Nvar, int Ndeg, int Ndeg2>
-inline void taylormul(
-    basic_polynomial<numtype, Nvar, Ndeg> &POLYMUL_RESTRICT p1,
-    const basic_polynomial<numtype, Nvar, Ndeg2> &p2)
+void taylormul(
+    var_polynomial<numtype, Nvar, Ndeg> &POLYMUL_RESTRICT dst,
+    const const_polynomial<numtype, Nvar, Ndeg2> &p)
 {
     assert(Ndeg2 <= Ndeg);
-    detail::taylor_inplace_multiplier<numtype, Nvar, Ndeg, Ndeg2, 0>::mul(p1.c, p2.c);
+    detail::taylor_inplace_multiplier<numtype, Nvar, Ndeg, Ndeg2, 0>::mul(
+        dst.get_coeffs(), p.get_coeffs());
 }
 
 /*!
- * \brief _Add_ the product of p and the single polynomial term rterm with coefficient c to dst.
+ * \brief _Add_ the product of p and the single polynomial term rterm with coefficient c to dst
+ * \param dst
+ * \param p
+ * \param c
  */
 template <class numtype, int Nvar, int Ndeg, int rterm>
-inline void termmul(
-    basic_polynomial<numtype, Nvar, Ndeg + detail::term_deg<Nvar, rterm>::deg> &POLYMUL_RESTRICT
-        dst,
-    const basic_polynomial<numtype, Nvar, Ndeg> &p, const numtype &c)
+void termmul(
+    var_polynomial<numtype, Nvar, Ndeg + detail::term_deg<Nvar, rterm>::deg> &POLYMUL_RESTRICT dst,
+    const const_polynomial<numtype, Nvar, Ndeg> &p, const numtype &c)
 {
     detail::term_multiplier<numtype, Nvar, detail::polylen<Nvar, Ndeg>::len - 1, rterm>::mul(
-        dst.c, p.c, c);
+        dst.get_coeffs(), p.get_coeffs(), c);
 }
 
 /*!
  * \brief Number of coefficients
+ * \param p
+ * \param x
  */
 template <class numtype, int Nvar, int Ndeg>
-inline void terms(basic_polynomial<numtype, Nvar, Ndeg> &p, const numtype x[])
+void terms(var_polynomial<numtype, Nvar, Ndeg> &p, const numtype x[])
 {
-    detail::polynomial_evaluator<numtype, numtype, Nvar, Ndeg>::eval_terms(p.c, x);
+    detail::polynomial_evaluator<numtype, numtype, Nvar, Ndeg>::eval_terms(p.get_coeffs(), x);
 }
 
 /*!
  * \brief Calculates p1 so that dot(P*p2,p3) = dot(P,p1)
  * P*p2 is polynomial multiplication, dot means summing the product of all coefficients).
+ * \param p1
+ * \param p2
+ * \param p3
  */
 template <class numtype, int Nvar, int Ndeg1, int Ndeg2>
-inline void contract(
-    basic_polynomial<numtype, Nvar, Ndeg1> &POLYMUL_RESTRICT p1,
-    const basic_polynomial<numtype, Nvar, Ndeg2> &p2,
-    const basic_polynomial<numtype, Nvar, Ndeg1 + Ndeg2> &p3)
+void contract(
+    var_polynomial<numtype, Nvar, Ndeg1> &POLYMUL_RESTRICT p1,
+    const const_polynomial<numtype, Nvar, Ndeg2> &p2,
+    const const_polynomial<numtype, Nvar, Ndeg1 + Ndeg2> &p3)
 {
     for (int i = 0; i < p1.size; i++)
         p1[i] = numtype();
-    detail::polynomial_multiplier<numtype, Nvar, Ndeg1, Ndeg2>::antimul(p3.c, p1.c, p2.c);
+    detail::polynomial_multiplier<numtype, Nvar, Ndeg1, Ndeg2>::antimul(
+        p3.get_coeffs(), p1.get_coeffs(), p2.get_coeffs());
 }
 
 /*!
  * \brief Multiply each term in the polynomial with appropriate factorials to generate derivatives,
  * i.e. x^n y^m z^k would be multiplied by n!m!k!
  * \note The factors are generated as enums, limiting the numeric range to rather small values.
+ * \param p
  */
 template <class numtype, int Nvar, int Ndeg>
-void dfac(basic_polynomial<numtype, Nvar, Ndeg> &p)
+void dfac(const_polynomial<numtype, Nvar, Ndeg> &p)
 {
-    detail::deriv_fac_multiplier<numtype, Nvar, detail::polylen<Nvar, Ndeg>::len - 1>::mul_fac(p.c);
+    detail::deriv_fac_multiplier<numtype, Nvar, detail::polylen<Nvar, Ndeg>::len - 1>::mul_fac(
+        p.get_coeffs());
 }
 
 /*!
  * \brief Perform a linear change of variables, with x_i in src being equal to the linear
  * combination as x_i = sum_j T_ji y_j. T_ji is of the format T_00, T_10, T_20 ..
+ * \param dst
+ * \param src
+ * \param T
  */
 template <class numtype, int Nvar_src, int Nvar_dst, int Ndeg>
 void trans(
-    basic_polynomial<numtype, Nvar_dst, Ndeg> &dst,
-    const basic_polynomial<numtype, Nvar_src, Ndeg> &src, const numtype T[Nvar_src * Nvar_dst])
+    var_polynomial<numtype, Nvar_dst, Ndeg> &dst,
+    const const_polynomial<numtype, Nvar_src, Ndeg> &src, const numtype T[Nvar_src * Nvar_dst])
 {
     polynomial<numtype, Nvar_dst, Ndeg> tmp;
-    detail::transformer<numtype, Nvar_dst, Nvar_src, Ndeg, 0, 0, 0>::trans(tmp.c, dst.c, src.c, T);
+    detail::transformer<numtype, Nvar_dst, Nvar_src, Ndeg, 0, 0, 0>::trans(
+        tmp.get_coeffs(), dst.get_coeffs(), src.get_coeffs(), T);
 }
 
-/*
- * print
+/*!
+ * \brief mul_vec
+ * \param size
+ * \param dst
+ * \param p1
+ * \param p2
+ */
+template <class numtype, int Nvar, int Ndeg1, int Ndeg2>
+inline void mul_vec(
+    int size, polynomial<numtype, Nvar, Ndeg1 + Ndeg2> dst[],
+    const polynomial<numtype, Nvar, Ndeg1> p1[], const polynomial<numtype, Nvar, Ndeg2> p2[])
+{
+    for (int i = 0; i < size; i++)
+        mul(dst[i], p1[i], p2[i]);
+}
+
+/*!
+ * \brief taylormul_vec
+ * \param size
+ * \param dst
+ * \param p1
+ * \param p2
+ */
+template <class numtype, int Nvar, int Ndeg>
+inline void taylormul_vec(
+    int size, polynomial<numtype, Nvar, Ndeg> dst[], const polynomial<numtype, Nvar, Ndeg> p1[],
+    const polynomial<numtype, Nvar, Ndeg> p2[])
+{
+    for (int i = 0; i < size; i++)
+        taylormul(dst[i], p1[i], p2[i]);
+}
+
+/*!
+ * \brief taylormul_vec
+ * \param size
+ * \param p1
+ * \param p2
+ */
+template <class numtype, int Nvar, int Ndeg, int Ndeg2>
+inline void taylormul_vec(
+    int size, polynomial<numtype, Nvar, Ndeg> p1[], const polynomial<numtype, Nvar, Ndeg2> p2[])
+{
+    for (int i = 0; i < size; i++)
+        taylormul(p1[i], p2[i]);
+}
+
+/*!
+ * \brief Print polynomial
+ * \param stream
+ * \param p
  */
 template <class num, int Nvar, int Ndeg>
-void print(std::ostream &dst, const basic_polynomial<num, Nvar, Ndeg> &p)
+void print(const const_polynomial<num, Nvar, Ndeg> &p, std::ostream &stream = std::cout)
 {
     int exps[Nvar] = {0};
     for (int i = 0; i < p.size; i++)
     {
         p.exponents(i, exps);
         for (int j = 0; j < Nvar; j++)
-            std::cout << exps[j] << " ";
-        std::cout << " " << p[i] << std::endl;
+            stream << exps[j] << " ";
+        stream << " " << p[i] << std::endl;
         assert(i == p.term_index(exps));
     }
 }

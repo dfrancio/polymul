@@ -1,0 +1,14 @@
+---
+BasedOnStyle: Webkit
+Standard: Cpp11
+ColumnLimit: 100
+BreakBeforeBraces: Allman
+NamespaceIndentation: None
+PointerAlignment: Right
+Cpp11BracedListStyle: true
+AlignAfterOpenBracket: AlwaysBreak
+AlwaysBreakTemplateDeclarations: true
+PenaltyReturnTypeOnItsOwnLine: 1000000
+AllowShortFunctionsOnASingleLine: None
+BreakConstructorInitializersBeforeComma: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true

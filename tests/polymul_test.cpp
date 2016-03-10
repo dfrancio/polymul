@@ -50,7 +50,7 @@ void test_trans(void)
     if (pit[0] != 1 or pit[1] != 47 or pit[2] != 1307)
     {
         cout << "WARNING: Integer trans failed" << endl;
-        print(cout, pit);
+        print(pit);
     }
 }
 
@@ -79,6 +79,20 @@ int main(void)
     int eval_1d_px[] = {-789, -1245, -1935};
 
     cout << "Starting tests.." << endl;
+
+    // Checking constructor and assignment
+    polynomial<int, 1, 2> poly1;
+    if (poly1[0] != 0)
+        cout << "WARNING (poly1[0]), expected " << 0 << " got " << poly1[0] << endl;
+    polynomial<int, 1, 2> poly2(1);
+    if (poly2[0] != 1)
+        cout << "WARNING (poly2[0]), expected " << 1 << " got " << poly2[0] << endl;
+    poly1 = poly2;
+    if (poly1[0] != 1)
+        cout << "WARNING (poly1[0]), expected " << 1 << " got " << poly1[0] << endl;
+    poly2 = 0;
+    if (poly1[0] != 0)
+        cout << "WARNING (poly1[0]), expected " << 0 << " got " << poly1[0] << endl;
 
     // Evaluating
     polynomial<int, 1, 2> peval_1d;
@@ -237,14 +251,14 @@ int main(void)
   pterms.zero();
   polyterms(pterms,ex);
   cout << "Terms for x=2, y=3, z=5:\n";
-  print(cout,pterms);
+  print(pterms);
 #endif
 #ifdef __GNUC__NOT_ICC__
     gcc_vectest();
 #endif
     cout << "If no warnings were printed above, then things are fine." << endl;
     cout << "Polynomial exponents and coefficients:\n";
-    print(cout, p1);
+    print(p1);
     cout << "End of tests." << endl;
     return 0;
 }

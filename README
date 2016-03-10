@@ -2,7 +2,7 @@ Fast multivariate polynomial multiplication in C++
 
 Created by Ulf Ekstrom <uekstrom@gmail.com> 2009
 
-Adapted and extended by Diego Sogari <diego.sogari@gmail.com> 2016.
+Adapted by Diego Sogari <diego.sogari@gmail.com> 2016
 
 See LICENSE for license
 
