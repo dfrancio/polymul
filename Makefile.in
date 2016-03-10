@@ -105,14 +105,14 @@ CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = polymul_test$(EXEEXT) benchmark$(EXEEXT) \
 	polymul_with_tab_test$(EXEEXT) benchmark_with_tab$(EXEEXT)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_benchmark_OBJECTS = tests/benchmark.$(OBJEXT)
+am_benchmark_OBJECTS = tests/benchmark-benchmark.$(OBJEXT)
 benchmark_OBJECTS = $(am_benchmark_OBJECTS)
 benchmark_LDADD = $(LDADD)
 am_benchmark_with_tab_OBJECTS =  \
 	tests/benchmark_with_tab-benchmark.$(OBJEXT)
 benchmark_with_tab_OBJECTS = $(am_benchmark_with_tab_OBJECTS)
 benchmark_with_tab_LDADD = $(LDADD)
-am_polymul_test_OBJECTS = tests/polymul_test.$(OBJEXT)
+am_polymul_test_OBJECTS = tests/polymul_test-polymul_test.$(OBJEXT)
 polymul_test_OBJECTS = $(am_polymul_test_OBJECTS)
 polymul_test_LDADD = $(LDADD)
 am_polymul_with_tab_test_OBJECTS =  \
@@ -498,17 +498,19 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = gentab.py
+AM_CXXFLAGS = -Wall
 include_HEADERS = \
 	include/polymul.h \
 	include/polymul_tab.h
 
-AM_CPPFLAGS = -Wall -I$(top_srcdir)/include
 polymul_test_SOURCES = tests/polymul_test.cpp
+polymul_test_CPPFLAGS = -I$(top_srcdir)/include
 benchmark_SOURCES = tests/benchmark.cpp
+benchmark_CPPFLAGS = -I$(top_srcdir)/include
 polymul_with_tab_test_SOURCES = tests/polymul_test.cpp
-polymul_with_tab_test_CPPFLAGS = -DPOLYMUL_USE_TABLES
+polymul_with_tab_test_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
 benchmark_with_tab_SOURCES = tests/benchmark.cpp
-benchmark_with_tab_CPPFLAGS = -DPOLYMUL_USE_TABLES
+benchmark_with_tab_CPPFLAGS = -I$(top_srcdir)/include -DPOLYMUL_USE_TABLES
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -571,7 +573,7 @@ tests/$(am__dirstamp):
 tests/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) tests/$(DEPDIR)
 	@: > tests/$(DEPDIR)/$(am__dirstamp)
-tests/benchmark.$(OBJEXT): tests/$(am__dirstamp) \
+tests/benchmark-benchmark.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
 benchmark$(EXEEXT): $(benchmark_OBJECTS) $(benchmark_DEPENDENCIES) $(EXTRA_benchmark_DEPENDENCIES) 
@@ -583,7 +585,7 @@ tests/benchmark_with_tab-benchmark.$(OBJEXT): tests/$(am__dirstamp) \
 benchmark_with_tab$(EXEEXT): $(benchmark_with_tab_OBJECTS) $(benchmark_with_tab_DEPENDENCIES) $(EXTRA_benchmark_with_tab_DEPENDENCIES) 
 	@rm -f benchmark_with_tab$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(benchmark_with_tab_OBJECTS) $(benchmark_with_tab_LDADD) $(LIBS)
-tests/polymul_test.$(OBJEXT): tests/$(am__dirstamp) \
+tests/polymul_test-polymul_test.$(OBJEXT): tests/$(am__dirstamp) \
 	tests/$(DEPDIR)/$(am__dirstamp)
 
 polymul_test$(EXEEXT): $(polymul_test_OBJECTS) $(polymul_test_DEPENDENCIES) $(EXTRA_polymul_test_DEPENDENCIES) 
@@ -603,9 +605,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/benchmark.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/benchmark-benchmark.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/benchmark_with_tab-benchmark.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/polymul_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/polymul_test-polymul_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/polymul_with_tab_test-polymul_test.Po@am__quote@
 
 .cpp.o:
@@ -624,6 +626,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
+tests/benchmark-benchmark.o: tests/benchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/benchmark-benchmark.o -MD -MP -MF tests/$(DEPDIR)/benchmark-benchmark.Tpo -c -o tests/benchmark-benchmark.o `test -f 'tests/benchmark.cpp' || echo '$(srcdir)/'`tests/benchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/benchmark-benchmark.Tpo tests/$(DEPDIR)/benchmark-benchmark.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/benchmark.cpp' object='tests/benchmark-benchmark.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/benchmark-benchmark.o `test -f 'tests/benchmark.cpp' || echo '$(srcdir)/'`tests/benchmark.cpp
+
+tests/benchmark-benchmark.obj: tests/benchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/benchmark-benchmark.obj -MD -MP -MF tests/$(DEPDIR)/benchmark-benchmark.Tpo -c -o tests/benchmark-benchmark.obj `if test -f 'tests/benchmark.cpp'; then $(CYGPATH_W) 'tests/benchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/benchmark.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/benchmark-benchmark.Tpo tests/$(DEPDIR)/benchmark-benchmark.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/benchmark.cpp' object='tests/benchmark-benchmark.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/benchmark-benchmark.obj `if test -f 'tests/benchmark.cpp'; then $(CYGPATH_W) 'tests/benchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/benchmark.cpp'; fi`
+
 tests/benchmark_with_tab-benchmark.o: tests/benchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_with_tab_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/benchmark_with_tab-benchmark.o -MD -MP -MF tests/$(DEPDIR)/benchmark_with_tab-benchmark.Tpo -c -o tests/benchmark_with_tab-benchmark.o `test -f 'tests/benchmark.cpp' || echo '$(srcdir)/'`tests/benchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/benchmark_with_tab-benchmark.Tpo tests/$(DEPDIR)/benchmark_with_tab-benchmark.Po
@@ -637,6 +653,20 @@ tests/benchmark_with_tab-benchmark.obj: tests/benchmark.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/benchmark.cpp' object='tests/benchmark_with_tab-benchmark.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(benchmark_with_tab_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/benchmark_with_tab-benchmark.obj `if test -f 'tests/benchmark.cpp'; then $(CYGPATH_W) 'tests/benchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/benchmark.cpp'; fi`
+
+tests/polymul_test-polymul_test.o: tests/polymul_test.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/polymul_test-polymul_test.o -MD -MP -MF tests/$(DEPDIR)/polymul_test-polymul_test.Tpo -c -o tests/polymul_test-polymul_test.o `test -f 'tests/polymul_test.cpp' || echo '$(srcdir)/'`tests/polymul_test.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/polymul_test-polymul_test.Tpo tests/$(DEPDIR)/polymul_test-polymul_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/polymul_test.cpp' object='tests/polymul_test-polymul_test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/polymul_test-polymul_test.o `test -f 'tests/polymul_test.cpp' || echo '$(srcdir)/'`tests/polymul_test.cpp
+
+tests/polymul_test-polymul_test.obj: tests/polymul_test.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/polymul_test-polymul_test.obj -MD -MP -MF tests/$(DEPDIR)/polymul_test-polymul_test.Tpo -c -o tests/polymul_test-polymul_test.obj `if test -f 'tests/polymul_test.cpp'; then $(CYGPATH_W) 'tests/polymul_test.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/polymul_test.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) tests/$(DEPDIR)/polymul_test-polymul_test.Tpo tests/$(DEPDIR)/polymul_test-polymul_test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='tests/polymul_test.cpp' object='tests/polymul_test-polymul_test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o tests/polymul_test-polymul_test.obj `if test -f 'tests/polymul_test.cpp'; then $(CYGPATH_W) 'tests/polymul_test.cpp'; else $(CYGPATH_W) '$(srcdir)/tests/polymul_test.cpp'; fi`
 
 tests/polymul_with_tab_test-polymul_test.o: tests/polymul_test.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(polymul_with_tab_test_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tests/polymul_with_tab_test-polymul_test.o -MD -MP -MF tests/$(DEPDIR)/polymul_with_tab_test-polymul_test.Tpo -c -o tests/polymul_with_tab_test-polymul_test.o `test -f 'tests/polymul_test.cpp' || echo '$(srcdir)/'`tests/polymul_test.cpp
