@@ -2,7 +2,7 @@
 #include <iostream>
 #include <polymul.h>
 
-#if _WIN32
+#ifdef _WIN32
 #include <windows.h>
 #define FREQ LARGE_INTEGER
 #define TICK LARGE_INTEGER
@@ -14,14 +14,14 @@
 using namespace std;
 using namespace polymul;
 
-#if _WIN32
+#ifdef _WIN32
 static FREQ frequency;
 #endif
 static TICK starttick;
 
 void start()
 {
-#if _WIN32
+#ifdef _WIN32
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&starttick);
 #else
@@ -31,8 +31,8 @@ void start()
 
 double stop()
 {
-#if _WIN32
-    LARGE_INTEGER stoptick;
+    TICK stoptick;
+#ifdef _WIN32
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&stoptick);
     return (stoptick.QuadPart - starttick.QuadPart) / (double) frequency.QuadPart;
@@ -116,3 +116,4 @@ int main(void)
 {
     benchmark<double, 4, 4>();
 }
+
